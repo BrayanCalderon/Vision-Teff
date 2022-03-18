@@ -1,0 +1,10 @@
+{
+  version: 1,
+  mediaFileName: 'principal.MTS',
+  cutSegments: [
+    {
+      start: 19.398601264953612,
+      name: '',
+    },
+  ],
+}
