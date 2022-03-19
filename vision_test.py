@@ -33,16 +33,15 @@ def hsv_pre(frame):
 
     
     img_hsv = cv2.cvtColor(frame, cv2.COLOR_RGB2HSV)
+    #Umbrales de color
     umbral_bajo = (0,0,0)
     umbral_alto = (28,190,34)
+    
     #mascara
     mask = cv2.inRange(img_hsv,umbral_bajo,umbral_alto)
-    
-    #frame[mask==255] = (0,255,0)
+    frame[mask==255] = (0,255,0)
     res = cv2.bitwise_and(img_hsv,img_hsv,mask = mask)
-    res[mask==255] = (255,0,0)
-    res[mask==0] = (mask)
-    
+    res[mask==255] = (255,0,0)    
     return res
 
 
@@ -93,28 +92,36 @@ cv2.createTrackbar("beta","Trackbar",6,100,nothing)
 #duración: 26 segundos, total 780 frames
 #digicamcontrol
 
+
+cap = cv2.VideoCapture(0)
+
 frame_width = int(cap.get(3))
 frame_height = int(cap.get(4))
 
 size = (frame_width,frame_height)
-fourcc = cv2.VideoWriter_fourcc(*'RGBA')
-result = cv2.VideoWriter("cut.avi",
-                          fourcc,
-                          30,(850,440))
+#fourcc = cv2.VideoWriter_fourcc(*'RGBA')
+#result = cv2.VideoWriter("cut.avi",
+#                          fourcc,
+#                          30,(850,440))
 
 frame_cont = 0
 while True:
-    filename = f"{frame_cont}.bmp"
-    frame_cont += 1
-    ret,frame = cap.read()
-    if frame is None:
-        break
+#    filename = f"{frame_cont}.bmp"
+#    frame_cont += 1
+#    ret,frame = cap.read()
+#    if frame is None:
+#        break
 
     #converting jpeg
     #frame = convertToJpeg(frame)
+ 
+    ret,frame = cap.read()
+    if not ret:
+        break
     
     #Extract ROI
-    roi = frame[:,:]
+    roi = frame[160:600,300:900]
+    #Resolución para camara
     #roi = frame[160:600,700:1550]
     #roi = increase_sat(roi)
     #3 de brillo
@@ -144,5 +151,5 @@ while True:
 
 
 cap.release()
-result.release()
+#result.release()
 cv2.destroyAllWindows()

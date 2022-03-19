@@ -1,20 +1,24 @@
-#finding hsv range of target object(pen)
+#Encontrar los umbrales hsv para una imagen o video
 import cv2
 import numpy as np
 import time
-# A required callback method that goes into the trackbar function.
+
+# Metodo callback requerido para utilizar trackbar
 def nothing(x):
     pass
 
-# Initializing the webcam feed.
-cap = cv2.VideoCapture(1)
+# Inicializar la captura de video
+cap = cv2.VideoCapture(2)
 #cap = cv2.imread("teff.PNG")
-cap.set(3,1280)
-cap.set(4,720)
+
+#propiedades del video de resolución
+#cap.set(3,1280)
+#cap.set(4,720)
 
 # Create a window named trackbars.
 cv2.namedWindow("Trackbars")
 cv2.namedWindow("img")
+
 
 # Now create 6 trackbars that will control the lower and upper range of 
 # H,S and V channels. The Arguments are like this: Name of trackbar, 
@@ -32,8 +36,11 @@ while True:
     # Start reading the webcam feed frame by frame.
     ret, frame = cap.read()
     #frame = cv2.imread("teffcut.PNG")
+    
+    # ret es un valor booleano que nos indica si el frame está disponible
     if not ret:
         break
+    
     # Flip the frame horizontally (Not required)
     frame = cv2.flip( frame, 1 ) 
     
@@ -58,6 +65,7 @@ while True:
     # your target color
     mask = cv2.inRange(hsv, lower_range, upper_range)
  
+ 
     # You can also visualize the real part of the target color (Optional)
     res = cv2.bitwise_and(frame, frame, mask=mask)
     
@@ -69,7 +77,7 @@ while True:
     stacked = np.hstack((mask_3,frame,res))
     
     # Show this stacked frame at 40% of the size.
-    cv2.imshow('img',cv2.resize(stacked,None,fx=1,fy=1))
+    cv2.imshow('img',cv2.resize(stacked,None,fx=0.5,fy=0.5))
     
     # If the user presses ESC then exit the program
     key = cv2.waitKey(1)
