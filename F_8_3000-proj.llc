@@ -1,0 +1,10 @@
+{
+  version: 1,
+  mediaFileName: 'F_8_3000.mkv',
+  cutSegments: [
+    {
+      start: 25.36907658926646,
+      name: '',
+    },
+  ],
+}
