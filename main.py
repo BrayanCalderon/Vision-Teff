@@ -98,6 +98,8 @@ def contours(frame,fullframe):
                 rects.append(rect)
                 calc_time((x,y))
         return frame
+    
+    tmth.enviar_pulso(1,0,0,s)
     return frame
 
 def draw_line(frame):
@@ -132,7 +134,7 @@ def calc_time(pos):
     #print(posy_mm)
     #Mando la señal utilizando la función creada en el otro .py
     time = trayec.trayec_simple(posy_mm, valv )
-    tmth.enviar_pulso_(2,time,valv)
+    tmth.enviar_pulso(2,time,valv+1,s)
     print(f" tiempo mandado en teoria {time} ")
     global cont_semillas
     cont_semillas += 1
@@ -152,7 +154,7 @@ def conexion():
 
 
 #Realizo la conexión
-#conexion()
+conexion()
 
 cap = cv2.VideoCapture("videos/test_4_06.mkv")
 cap.set(5, 30)
@@ -221,6 +223,9 @@ cap.release()
 
 print(f"El minimo FPS fue de {min_fps} y el maximo FPS fue de {max_fps} ")
 print(f"Se identificaron {cont_semillas} semillas")
-#s.close()
+time.sleep(2)
+tmth.enviar_pulso(4,0,0,s)
+
+s.close()
  
         

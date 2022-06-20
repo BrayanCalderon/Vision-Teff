@@ -17,20 +17,20 @@ while True and _ != 19:
     
     s.send(a.encode())
     print(a)
-    time.sleep(0.3)
+    time.sleep(0.2)
     s.send(b.encode())
     print(b)
-    time.sleep(0.3)
+    time.sleep(0.2)
     s.send(c.encode())
     print(c)
-    time.sleep(0.3)
+    time.sleep(0.2)
     
     _+=1
 
 
-#close = "3"    
-#s.send(close.encode())
+close = "4"    
+s.send(close.encode())
 print("Close")
-#s.close()
+s.close()
 
 print("Fin programa")

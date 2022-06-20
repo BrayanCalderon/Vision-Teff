@@ -8,10 +8,10 @@ g =  9.77412            # Gravedad en Bogotá
 
 def trayec_simple(valv,posy):
     
-    if valv == 1:
-        valv = 3
-    elif valv == 3:
-        valv = 1
+    #if valv == 1:
+    #    valv = 3
+    #elif valv == 3:
+    #    valv = 1
     
     a = -4.6345
     b = 2.4764

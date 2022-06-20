@@ -7,7 +7,7 @@ d = dict()
 def test(*args):
     s = args[1]
     print(f"Valvula {args[0]} Activada\n")
-    s.send((str(1)+" "+str(args[0])).encode())
+    s.send((str(args[2])+"0"+str(args[0])).encode())
     
 def test_(*args):
     print(f"Valvula {args} Activada\n")
@@ -15,7 +15,7 @@ def test_(*args):
 
 def enviar_pulso(id,tiempo,valvula,s):
     global d
-    d[id] = threading.Timer(tiempo,test,args = [valvula,s])
+    d[id] = threading.Timer(tiempo,test,args = [valvula,s,id])
     d[id].start()
     
 def enviar_pulso_(id,tiempo,valvula):

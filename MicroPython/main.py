@@ -53,9 +53,10 @@ def emergency_stop():
 #Crea la red en el esp32 para conectarse via wifi el pc 
 def create_network():
     ap = network.WLAN(network.AP_IF) # create access-point interface
-    ap.config(essid='ESP-AP') # set the ESSID of the access point
+    ap.config(essid='ESP-AP', channel =13) # set the ESSID of the access point
     ap.config(max_clients=10) # set how many clients can connect to the network
     ap.active(True)
+    network.phy_mode(["MODE_11N"])
     print(ap.ifconfig()[0])
     
     
@@ -149,12 +150,11 @@ if __name__ == '__main__':
     #time.sleep(1)
     print("Servidor Iniciado, esperando conexiones:")
     
-    continue2 = True
     #Inicia el loop
     while True:
         
         #Información LCD
-        (sc,addr) = s.accept()
+        (sc,addr) = s.accept() 
         if addr:
             ###lcd.clear()
             ###lcd.putstr("Conectado "+str(addr))
@@ -168,15 +168,18 @@ if __name__ == '__main__':
         #Parte de network    
         print(addr)
         while True:
-            
-            #Recibo mensaje de 64 bits
+            #Recibo mensaje de 4 bytes
             mensaje = sc.recv(4).decode()
+            print("mensaje: ", mensaje)
             if not mensaje:
                 continue
                 #break
             
             if mensaje[0] == "1":
-                break
+                pass
+            if not (mensaje[0:2].isdigit())  or (len(mensaje) < 3 or len(mensaje) > 4):
+                continue
+                
             
             #composición mensaje [función,tiempo,zona]
             
@@ -190,12 +193,12 @@ if __name__ == '__main__':
                 time.sleep(0.03)
 
 
-            elif mensaje[0] == "3":
-                continue2 = False
+            elif mensaje[0] == "4":
+                sc.close()
                 break
 
             print(mensaje)
+            
+        print("Sali del primer while")
+    print("sali del segundo while")
         
-        if not continue2:
-            break
-    sc.close()
