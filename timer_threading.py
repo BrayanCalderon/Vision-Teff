@@ -5,16 +5,17 @@ import socket
 d = dict()
 
 def test(*args):
-    print(f"Hola pasaron {args[0]} segundos\n")
+    s = args[1]
+    print(f"Valvula {args[0]} Activada\n")
     s.send((str(1)+" "+str(args[0])).encode())
     
 def test_(*args):
-    print(f"Hola pasaron {args} segundos\n")
+    print(f"Valvula {args} Activada\n")
     #s.send((str(1)+" "+str(args[0])).encode())
 
-def enviar_pulso(id,tiempo,valvula):
+def enviar_pulso(id,tiempo,valvula,s):
     global d
-    d[id] = threading.Timer(tiempo,test,args = [valvula])
+    d[id] = threading.Timer(tiempo,test,args = [valvula,s])
     d[id].start()
     
 def enviar_pulso_(id,tiempo,valvula):
@@ -22,9 +23,18 @@ def enviar_pulso_(id,tiempo,valvula):
     d[id] = threading.Timer(tiempo,test_,args = [valvula])
     d[id].start()
 
+def conexion():
+    try:
+        s = socket.socket()
+        s.connect(("192.168.4.1",2020))
+        print("Conexión Exitosa")
+    except:
+        print("Intentando conectar de nuevo")
+        conexion()
+            
+
 #Realizo la conexión
-#s = socket.socket()
-#s.connect(("192.168.4.1",2020))
+#
 
 #input("Da enter para comenzar :3")
 #Envio pulsos de prueba

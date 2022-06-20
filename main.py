@@ -1,7 +1,10 @@
 import  cv2
 import numpy as np
 import time
+import socket
 import timer_threading as tmth
+import trayectoria as trayec
+
 
 cont_semillas = 0
 
@@ -98,38 +101,58 @@ def contours(frame,fullframe):
     return frame
 
 def draw_line(frame):
-    #Shape X = 676, Y = 675
-    
-    #start_point = (0,(frame.shape[0]//2)-120)
-    #end_point = (frame.shape[0]+200,(frame.shape[0]//2)-120)
-    #frame = cv2.line(frame,start_point,end_point,(0, 255, 255),2)
-    
-    #start_point = (0,(frame.shape[0]//2)+120)
-    #end_point = (frame.shape[0]+200,(frame.shape[0]//2)+120)
-    #frame = cv2.line(frame,start_point,end_point,(0, 255, 255),2)
-    
     linea = 35
     while linea < frame.shape[0]:
         start_point = (0,linea)
-        end_point = (frame.shape[0]+200,linea)
+        end_point = (frame.shape[1],linea)
         frame = cv2.line(frame,start_point,end_point,(0, 255, 255),2)
         linea +=35
+    
+    ver = 545//3
+    while ver < frame.shape[0]:
+        start_point = (ver, 0)
+        end_point = (ver, frame.shape[0])
+        frame = cv2.line(frame,start_point,end_point,(0, 0, 255),2)
+        ver += ver
+    
+
+   
         
     
     return frame
 
 def calc_time(pos):
+    global s
     #Pixel inicio 35
     #2mm -> 35pixeles
     print(f" centro de la semilla es {pos[0]},{pos[1]} ")
-    tmth.enviar_pulso_(2,pos[1]/10,1)
-    print(f" tiempo mandado en teoira {pos[1]/10} ")
+    #Divide la sección en 3 partes iguales y me dice que valvula debo activar
+    valv = pos[0]//182 #Posición en X
+    posy_mm = -((pos[1]*2)/35)
+    #print(posy_mm)
+    #Mando la señal utilizando la función creada en el otro .py
+    time = trayec.trayec_simple(posy_mm, valv )
+    tmth.enviar_pulso_(2,time,valv)
+    print(f" tiempo mandado en teoria {time} ")
     global cont_semillas
     cont_semillas += 1
-        
-    
 
 
+def conexion():
+    global s
+    try:
+        s = socket.socket()
+        s.connect(("192.168.4.1",2020))
+        print("Conexión Exitosa")
+    except:
+        print("Intentando conectar de nuevo")
+        conexion()    
+
+
+
+
+#Realizo la conexión
+#conexion()
 
 cap = cv2.VideoCapture("videos/test_4_06.mkv")
 cap.set(5, 30)
@@ -151,14 +174,11 @@ max_fps = 0
 #fourcc = cv2.VideoWriter_fourcc(*'MJPG')
 #out = cv2.VideoWriter('outputtest.avi',fourcc, 60.0, (468,174))
 
-cond = True
 
 while True:
     
     ret, frame = cap.read()
-    if cond:
-        print(frame.shape[:2])
-        cond = False
+
     
     if not ret:break
     cv2.rectangle(frame, (x,y), (x+w, y+h),(0,255,0), 2)
@@ -167,7 +187,6 @@ while True:
     frameaux = draw_line(frameaux)
     
     
-    frame = cv2.resize(frame, (1920,1080), interpolation = cv2.INTER_AREA)
 
     
     
@@ -176,6 +195,7 @@ while True:
     cv2.imshow("frame", frame)
     
     frameaux= cv2.resize(frameaux, (471, 649))
+    
     #frameaux = cv2.cvtColor(frameaux, cv2.COLOR_GRAY2BGR)
 
 
@@ -201,5 +221,6 @@ cap.release()
 
 print(f"El minimo FPS fue de {min_fps} y el maximo FPS fue de {max_fps} ")
 print(f"Se identificaron {cont_semillas} semillas")
+#s.close()
  
         

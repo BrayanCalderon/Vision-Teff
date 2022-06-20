@@ -5,6 +5,8 @@ import usocket
 ###from lcd_api import LcdApi
 ###from pico_i2c_lcd import I2cLcd
 
+
+
 #Información LCD
 I2C_ADDR     = 0x27
 I2C_NUM_ROWS = 2
@@ -146,7 +148,8 @@ if __name__ == '__main__':
     ###lcd.putstr("Esperando conexiones")
     #time.sleep(1)
     print("Servidor Iniciado, esperando conexiones:")
-
+    
+    continue2 = True
     #Inicia el loop
     while True:
         
@@ -164,35 +167,35 @@ if __name__ == '__main__':
             
         #Parte de network    
         print(addr)
-        continuar2 = True
         while True:
-            #Recibo mensaje de 64 bits 
-            mensaje = sc.recv(64).decode()
-            #composición mensaje [función,tiempo,zona]
+            
+            #Recibo mensaje de 64 bits
+            mensaje = sc.recv(4).decode()
             if not mensaje:
-                print("Not message")
+                continue
                 #break
             
-            elif mensaje[0] == "1":
-                #tupla de posiciones
-                queue_valvulas.append(int(mensaje[2])) 
-                activar_valvula()
+            if mensaje[0] == "1":
+                break
+            
+            #composición mensaje [función,tiempo,zona]
+            
+                
             elif mensaje[0] == "2":
-                print("entredos")
                 queue_valvulas.append(int(mensaje[2])) 
                 queue_valvulas.append(int(mensaje[2])) 
                 activar_valvula()
-                print("entredos.1")
-                time.sleep(0.2)
+                time.sleep(0.04)
                 desactivar_valvula()
-                print("entredos.2")
-
-                print("salidos")
+                time.sleep(0.03)
 
 
             elif mensaje[0] == "3":
+                continue2 = False
                 break
 
             print(mensaje)
-        sc.close()
-        break
+        
+        if not continue2:
+            break
+    sc.close()

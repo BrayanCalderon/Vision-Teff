@@ -3,20 +3,34 @@ import time
 s = socket.socket()
 s.connect(("192.168.4.1",2020))
 _=0
+time.sleep(3)
+
+#open = "1"
+#s.send(open.encode())
+print("Open")
+
 while True and _ != 19:
-    #a = input("Ingresa tu mensaje mamalon")
+        
+    a = "201"
+    b = "202" 
+    c = "203"
     
-    a = "201"    
-    print("mandé 201")
     s.send(a.encode())
-    time.sleep(5)
-    #a = "202"
-    #print("mande 202")
-    #s.send(a.encode())
-    #time.sleep(2)
+    print(a)
+    time.sleep(0.3)
+    s.send(b.encode())
+    print(b)
+    time.sleep(0.3)
+    s.send(c.encode())
+    print(c)
+    time.sleep(0.3)
     
     _+=1
-    
-s.close()
+
+
+#close = "3"    
+#s.send(close.encode())
+print("Close")
+#s.close()
 
 print("Fin programa")
