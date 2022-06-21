@@ -56,7 +56,9 @@ def create_network():
     ap.config(essid='ESP-AP', channel =13) # set the ESSID of the access point
     ap.config(max_clients=10) # set how many clients can connect to the network
     ap.active(True)
-    network.phy_mode(["MODE_11N"])
+    print("channel")
+    print(ap.config('mac'))
+
     print(ap.ifconfig()[0])
     
     
@@ -146,10 +148,12 @@ if __name__ == '__main__':
     s = usocket.socket()
     s.bind(("192.168.4.1",2020))
     s.listen(10)
+    
     ###lcd.putstr("Esperando conexiones")
     #time.sleep(1)
     print("Servidor Iniciado, esperando conexiones:")
-    
+    contador = 0
+    contador2 = 0
     #Inicia el loop
     while True:
         
@@ -171,6 +175,7 @@ if __name__ == '__main__':
             #Recibo mensaje de 4 bytes
             mensaje = sc.recv(4).decode()
             print("mensaje: ", mensaje)
+            contador2 += 1
             if not mensaje:
                 continue
                 #break
@@ -190,14 +195,19 @@ if __name__ == '__main__':
                 activar_valvula()
                 time.sleep(0.04)
                 desactivar_valvula()
-                time.sleep(0.03)
+                contador +=1
+                #time.sleep(0.03)
 
 
             elif mensaje[0] == "4":
                 sc.close()
                 break
 
-            print(mensaje)
+            print("f",mensaje)
+            
+            print("contador: ", contador)
+            print("contador2: ", contador2)
+
             
         print("Sali del primer while")
     print("sali del segundo while")

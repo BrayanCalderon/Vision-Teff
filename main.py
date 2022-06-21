@@ -122,9 +122,9 @@ def draw_line(frame):
         
     
     return frame
-
+contador = 0
 def calc_time(pos):
-    global s
+    global s, contador
     #Pixel inicio 35
     #2mm -> 35pixeles
     print(f" centro de la semilla es {pos[0]},{pos[1]} ")
@@ -135,6 +135,7 @@ def calc_time(pos):
     #Mando la señal utilizando la función creada en el otro .py
     time = trayec.trayec_simple(posy_mm, valv )
     tmth.enviar_pulso(2,time,valv+1,s)
+    contador += 1
     print(f" tiempo mandado en teoria {time} ")
     global cont_semillas
     cont_semillas += 1
@@ -223,6 +224,7 @@ cap.release()
 
 print(f"El minimo FPS fue de {min_fps} y el maximo FPS fue de {max_fps} ")
 print(f"Se identificaron {cont_semillas} semillas")
+print(f"contador {contador}")
 time.sleep(2)
 tmth.enviar_pulso(4,0,0,s)
 
