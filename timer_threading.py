@@ -3,11 +3,14 @@ import time
 import socket
 
 d = dict()
-
 def test(*args):
+    
     s = args[1]
-    print(f"Valvula {args[0]} Activada\n")
-    s.send((str(args[2])+"0"+str(args[0])).encode())
+    print(f"Valvula {args[0]} Activada\n ")
+    texto = str(args[2])+"0"+str(args[0])
+    texto = texto.split(".")[0]
+    #print(f"mensaje codificado enviado {texto}")
+    s.send(texto.encode())
     
 def test_(*args):
     print(f"Valvula {args} Activada\n")

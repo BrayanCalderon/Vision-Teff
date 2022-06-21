@@ -70,8 +70,7 @@ def desactivar_valvula():
     if queue_valvulas:
         valvula = int(queue_valvulas.pop(0))
         valvulas_dict["valvula"+str(valvula)].duty(0)
-        print("valvula des:", valvula)
-        print("El duty es:",valvulas_dict["valvula"+str(valvula)].duty())
+
 
     
     
@@ -80,8 +79,7 @@ def activar_valvula():
     if queue_valvulas:
         valvula = int(queue_valvulas.pop(0))
         valvulas_dict["valvula"+str(valvula)].duty(1023)
-        print("valvula act:", valvula)
-        print("El duty act es:",valvulas_dict["valvula"+str(valvula)].duty())
+        print("valvula activada:", valvula)
 
         
         
@@ -102,7 +100,6 @@ if __name__ == '__main__':
     
     
     create_network()
-    print("Comence")
     #Creo la variable p27 como entrada
     p27 = Pin(27, Pin.IN)
     
@@ -127,9 +124,6 @@ if __name__ == '__main__':
     cw_m1_2.on()
     cw_m2_1.on()
     
-    
-    print("comencé2")
-
     #Si el pin27 recibe una señal alta, se acciona y activa la función parada de emergencia
     p27.irq(handler=emergency_stop, trigger=Pin.IRQ_RISING)
     
@@ -152,8 +146,6 @@ if __name__ == '__main__':
     ###lcd.putstr("Esperando conexiones")
     #time.sleep(1)
     print("Servidor Iniciado, esperando conexiones:")
-    contador = 0
-    contador2 = 0
     #Inicia el loop
     while True:
         
@@ -169,46 +161,32 @@ if __name__ == '__main__':
         ###lcd.clear()
         ###lcd.putstr("En funcionamiento: ")
             
-        #Parte de network    
-        print(addr)
         while True:
+            codigo = sc.recv(3).decode()
+            
+            try:
             #Recibo mensaje de 4 bytes
-            mensaje = sc.recv(4).decode()
-            print("mensaje: ", mensaje)
-            contador2 += 1
-            if not mensaje:
+                mensaje = codigo
+            except:
                 continue
-                #break
             
             if mensaje[0] == "1":
+                print("Control")
                 pass
-            if not (mensaje[0:2].isdigit())  or (len(mensaje) < 3 or len(mensaje) > 4):
-                continue
-                
-            
+
             #composición mensaje [función,tiempo,zona]
-            
-                
-            elif mensaje[0] == "2":
+            if mensaje[0] == "2":
                 queue_valvulas.append(int(mensaje[2])) 
                 queue_valvulas.append(int(mensaje[2])) 
                 activar_valvula()
                 time.sleep(0.04)
                 desactivar_valvula()
-                contador +=1
-                #time.sleep(0.03)
-
+                time.sleep(0.03)
 
             elif mensaje[0] == "4":
                 sc.close()
                 break
 
-            print("f",mensaje)
-            
-            print("contador: ", contador)
-            print("contador2: ", contador2)
-
-            
         print("Sali del primer while")
     print("sali del segundo while")
         

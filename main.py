@@ -226,7 +226,9 @@ print(f"El minimo FPS fue de {min_fps} y el maximo FPS fue de {max_fps} ")
 print(f"Se identificaron {cont_semillas} semillas")
 print(f"contador {contador}")
 time.sleep(2)
-tmth.enviar_pulso(4,0,0,s)
+
+close = "400"
+s.send(close.encode())
 
 s.close()
  
