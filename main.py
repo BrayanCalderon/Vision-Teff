@@ -123,8 +123,9 @@ def draw_line(frame):
     
     return frame
 contador = 0
+
 def calc_time(pos):
-    global s, contador
+    global s, contador,timeteo
     #Pixel inicio 35
     #2mm -> 35pixeles
     print(f" centro de la semilla es {pos[0]},{pos[1]} ")
@@ -134,6 +135,7 @@ def calc_time(pos):
     #print(posy_mm)
     #Mando la señal utilizando la función creada en el otro .py
     time = trayec.trayec_simple(posy_mm, valv )
+    timeteo = time
     tmth.enviar_pulso(2,time,valv+1,s)
     contador += 1
     print(f" tiempo mandado en teoria {time} ")
@@ -158,11 +160,11 @@ def conexion():
 conexion()
 
 cap = cv2.VideoCapture("videos/test_4_06.mkv")
+
 cap.set(5, 30)
 cap.set(3, 1920)
 cap.set(4, 1080)
-#cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
-#cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
+
 
 
 x,y,w,h = selectROI(0)
@@ -180,46 +182,45 @@ max_fps = 0
 
 while True:
     
+    #Lectura del Frame    
     ret, frame = cap.read()
-
-    
     if not ret:break
+    
+    #Aplico preprocesamiento y procesamiento de señales al frame
     cv2.rectangle(frame, (x,y), (x+w, y+h),(0,255,0), 2)
     frameaux = focusROI(frame,x,y,w,h)
     frameaux = contours(frameaux,frame)
     frameaux = draw_line(frameaux)
-    
-    
-
-    
-    
+        
+    #Visualización de los frames y de los FPS estimados
     prev_time_fps,fpsframe = fps(prev_time_fps)
     cv2.putText(frame, fpsframe, (7, 70), cv2.FONT_HERSHEY_SIMPLEX, 3, (100, 255, 0), 3, cv2.LINE_AA)
     cv2.imshow("frame", frame)
     
+    #Visualización de la zona de interés  
     frameaux= cv2.resize(frameaux, (471, 649))
-    
+        
     #frameaux = cv2.cvtColor(frameaux, cv2.COLOR_GRAY2BGR)
 
-
-    #for _ in range(20):
-    #    out.write(frameaux)
+    #Snippet para escritura de video
+        #for _ in range(20):
+        #    out.write(frameaux)
 
     cv2.imshow("ROI", frameaux)
-    
-    
-    
+        
+        
+    #Registros de los picos en los FPS  
     if int(fpsframe) < min_fps and (int(fpsframe) > 0):
         min_fps = int(fpsframe)
     elif int(fpsframe)  > max_fps:
         max_fps = int(fpsframe)
-    
+        
     k = cv2.waitKey(1) & 0xFF
     if k == 27:
         break
-    
+        
 cap.release()
-#out.release()
+    #out.release()
 
 
 print(f"El minimo FPS fue de {min_fps} y el maximo FPS fue de {max_fps} ")
@@ -227,9 +228,11 @@ print(f"Se identificaron {cont_semillas} semillas")
 print(f"contador {contador}")
 time.sleep(2)
 
+#Se cierra la conexión con el ESP32
 close = "400"
 s.send(close.encode())
 
 s.close()
- 
-        
+    
+    
+            

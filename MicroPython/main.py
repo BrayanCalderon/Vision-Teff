@@ -5,7 +5,15 @@ import usocket
 ###from lcd_api import LcdApi
 ###from pico_i2c_lcd import I2cLcd
 
-
+"""
+Código encargado de realizar el control de las valvulas conectadas al microcontrolador ESP32,
+se encuentra planeado para trabajar con exactamente 3 distintas valvulas por medio de un control ON-OFF,
+realizando la comunicación por medio de un modulo WIFI a través de un protocolo de comunicación TCP via sockets
+la red inalambrica creada en el propio ESP32 está nombrada como ESP-AP. Permite utilizar una pantalla LCD como interfaz 
+para conocer el estado del sistema pero no es esencial para su funcionamiento.
+La información compartida en la comunicación está compuesta por paquetes de 3 bytes conformados por 3 números dispuestos de la
+siguiente forma [id,tiempo,valvula] donde id es el código de la acción, el tiempo de activación  y finalmente la valvula a accionar.
+"""
 
 #Información LCD
 I2C_ADDR     = 0x27
@@ -33,7 +41,7 @@ PMW_M2_1 = 19
 ###lcd = I2cLcd(i2c, I2C_ADDR, I2C_NUM_ROWS, I2C_NUM_COLS)
 ###lcd.clear()
 
-#Cola de accionamiento valvulas
+#Cola de accionamiento valvulas, estas determinan el orden en que llegan los mensajes y el orden de accionamiento de las valvulas
 queue_valvulas = []
 valvulas_dict = dict()
 
@@ -52,13 +60,11 @@ def emergency_stop():
 
 #Crea la red en el esp32 para conectarse via wifi el pc 
 def create_network():
-    ap = network.WLAN(network.AP_IF) # create access-point interface
-    ap.config(essid='ESP-AP', channel =13) # set the ESSID of the access point
-    ap.config(max_clients=10) # set how many clients can connect to the network
+    ap = network.WLAN(network.AP_IF) # Crea la interfaz de conexión Acces Point
+    ap.config(essid='ESP-AP', channel =13) # Configura el nombre de la Red y asigna una banda de comunicación WIFI
+    ap.config(max_clients=10) # Configura la cantidad máxima de clientes que se pueden conectar a la ESP32
     ap.active(True)
-    print("channel")
-    print(ap.config('mac'))
-
+    
     print(ap.ifconfig()[0])
     
     
@@ -81,20 +87,7 @@ def activar_valvula():
         valvulas_dict["valvula"+str(valvula)].duty(1023)
         print("valvula activada:", valvula)
 
-        
-        
-        
-        
-        #Prueba con led esp32
-        #pin  = "p"+str(valvula)
-        #print(pin)
-        #if valvulas_dict[pin].value():
-        #   valvulas_dict[pin].off()
-        #else:
-        #    valvulas_dict[pin].on()
-        
 
-    
     
 if __name__ == '__main__':
     
@@ -103,9 +96,6 @@ if __name__ == '__main__':
     #Creo la variable p27 como entrada
     p27 = Pin(27, Pin.IN)
     
-    #Prueba
-    #p2 = Pin(2, Pin.OUT)
-    #valvulas_dict["p2"] = p2
     
     #Activación PINES SALIDA
 
@@ -132,6 +122,7 @@ if __name__ == '__main__':
     valvula2 = PWM(Pin(PMW_M1_2), freq = 20000, duty = 0)         
     valvula3 = PWM(Pin(PMW_M2_1), freq = 20000, duty = 0)         
     #valvula4 = PWM(Pin(15), freq = 20000, duty = 1023)     
+    
     #Agrego a diccionario de valvulas
     valvulas_dict["valvula1"] = valvula1
     valvulas_dict["valvula2"] = valvula2
@@ -165,7 +156,7 @@ if __name__ == '__main__':
             codigo = sc.recv(3).decode()
             
             try:
-            #Recibo mensaje de 4 bytes
+            #Recibo mensaje de 3 bytes
                 mensaje = codigo
             except:
                 continue
