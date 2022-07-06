@@ -4,7 +4,7 @@ import time
 import socket
 import timer_threading as tmth
 import trayectoria as trayec
-
+import os
 
 cont_semillas = 0
 
@@ -14,9 +14,10 @@ def selectROI(reset = 0):
         x,y,w,h = cv2.selectROI(frame)
         return x,y,w,h
     else:
-         
-        return 616,40,545,1080 #roi perfecto grabación
-        #return 254,1,186,462 roi para cuando se conecta camara
+        
+        #return 692,22,514,809 #roi perfecto grabación
+        #return 254,1,186,462 #roi para cuando se conecta camara
+        return 468, 24, 344, 360 
         #35 pixeles son alrededor de 2mm
         #17.5 pixeles por tanto son alrededor de 1mm
         #pixel 35 más o menos es el inicio
@@ -54,12 +55,12 @@ def area(box):
 def contours(frame,fullframe):
     
     img_gray_b = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
-    ret,th1 = cv2.threshold(img_gray_b,120,255,cv2.THRESH_BINARY_INV)
+    ret,th1 = cv2.threshold(img_gray_b,100,255,cv2.THRESH_BINARY_INV)
     contours, hierarchy = cv2.findContours(th1, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
     outer_contours = []
     src_color = img_gray_b.copy()
     
-    color_copy = frame.copy()
+    #color_copy = frame.copy()
     if contours:
         # Seleccionar solo los contornos que no tienen padres por nivel de jerarquia
         for i in range(len(hierarchy[0])):
@@ -83,11 +84,11 @@ def contours(frame,fullframe):
             x ,y ,w, h = area(box)
             
             # Selecciona los contornos que cumplen ciertas condiciones
-            if (w*h >= src_color.shape[0]*src_color.shape[1]) or w*h < 20 or w*h > 300:
+            if (w*h >= src_color.shape[0]*src_color.shape[1]) or w*h < 10 or w*h > 300:
                 continue
             else:
                 #Dibuja los contornos de los elementos encontrados
-                cv2.drawContours(frame,[box],0,(0,255,0),1)
+                cv2.drawContours(frame,[box],0,(0,255,0),3)
                 rect = cv2.minAreaRect(outer_contours[i])
                 w,h = rect[1]
                 x,y = rect[0] #centro
@@ -96,6 +97,7 @@ def contours(frame,fullframe):
                 elif y+h > h_max:
                     h_max = h+y
                 rects.append(rect)
+                print(frame.shape)
                 calc_time((x,y))
         return frame
     
@@ -110,7 +112,7 @@ def draw_line(frame):
         frame = cv2.line(frame,start_point,end_point,(0, 255, 255),2)
         linea +=35
     
-    ver = 545//3
+    ver = 344//3
     while ver < frame.shape[0]:
         start_point = (ver, 0)
         end_point = (ver, frame.shape[0])
@@ -128,17 +130,26 @@ def calc_time(pos):
     global s, contador,timeteo
     #Pixel inicio 35
     #2mm -> 35pixeles
-    print(f" centro de la semilla es {pos[0]},{pos[1]} ")
+    #print(f" centro de la semilla es {pos[0]},{pos[1]} ")
     #Divide la sección en 3 partes iguales y me dice que valvula debo activar
-    valv = pos[0]//182 #Posición en X
+    valv = pos[0]//113 #Posición en X
+    if valv >=3 : valv = 2
     posy_mm = -((pos[1]*2)/35)
     #print(posy_mm)
     #Mando la señal utilizando la función creada en el otro .py
-    time = trayec.trayec_simple(posy_mm, valv )
-    timeteo = time
-    tmth.enviar_pulso(2,time,valv+1,s)
+    #time = trayec.trayec_simple(posy_mm, valv )
+    #timeteo = time
+    #tmth.enviar_pulso(2,time,valv+1,s)
+    
+    #texto = ("20"+str(valv+1))
+    
+    
+    tmth.test(valv+1,s,2)
+    
+    
+    #s.send(texto.encode())
     contador += 1
-    print(f" tiempo mandado en teoria {time} ")
+    #print(f" tiempo mandado en teoria {time} ")
     global cont_semillas
     cont_semillas += 1
 
@@ -157,13 +168,18 @@ def conexion():
 
 
 #Realizo la conexión
+
+
 conexion()
 
-cap = cv2.VideoCapture("videos/test_4_06.mkv")
+cap = cv2.VideoCapture(2)
 
-cap.set(5, 30)
-cap.set(3, 1920)
-cap.set(4, 1080)
+#cap.set(5, 30)
+#cap.set(3, 1920)
+#cap.set(4, 1080)
+cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+
 
 
 
@@ -175,52 +191,64 @@ max_fps = 0
 
 
 
-#Para grabar video descomentar las dos lineas de abajo
-#fourcc = cv2.VideoWriter_fourcc(*'MJPG')
-#out = cv2.VideoWriter('outputtest.avi',fourcc, 60.0, (468,174))
 
+frame_prev = np.zeros((1280,720))
 
+count = 0
 while True:
     
     #Lectura del Frame    
     ret, frame = cap.read()
     if not ret:break
-    
+    # time_proof1 = time.time()
+    if np.array_equal(frame,frame_prev): continue
+
+    frame_prev = frame.copy()
+    #print(frame.shape)
+    #frame = cv2.resize(frame, (1920, 1080))                # Resize image
+
     #Aplico preprocesamiento y procesamiento de señales al frame
-    cv2.rectangle(frame, (x,y), (x+w, y+h),(0,255,0), 2)
+    #cv2.rectangle(frame, (x,y), (x+w, y+h),(0,255,0), 2)
     frameaux = focusROI(frame,x,y,w,h)
     frameaux = contours(frameaux,frame)
+    
+    # time_proof2 = time.time()
+    # time_proof = time_proof2-time_proof1
+    # print(np.float64(time_proof2-time_proof1))
+    
     frameaux = draw_line(frameaux)
         
     #Visualización de los frames y de los FPS estimados
-    prev_time_fps,fpsframe = fps(prev_time_fps)
-    cv2.putText(frame, fpsframe, (7, 70), cv2.FONT_HERSHEY_SIMPLEX, 3, (100, 255, 0), 3, cv2.LINE_AA)
+    #prev_time_fps,fpsframe = fps(prev_time_fps)
+    #cv2.putText(frame, fpsframe, (7, 70), cv2.FONT_HERSHEY_SIMPLEX, 3, (100, 255, 0), 3, cv2.LINE_AA)
     cv2.imshow("frame", frame)
     
     #Visualización de la zona de interés  
     frameaux= cv2.resize(frameaux, (471, 649))
-        
-    #frameaux = cv2.cvtColor(frameaux, cv2.COLOR_GRAY2BGR)
+    
+  
 
     #Snippet para escritura de video
-        #for _ in range(20):
-        #    out.write(frameaux)
-
+    #for _ in range(20):
+    #    out.write(frameaux)
+    
+    #cv2.imwrite(os.path.join("Frames/",str(count)+".png"), frameaux)
+    #count +=1
     cv2.imshow("ROI", frameaux)
         
         
     #Registros de los picos en los FPS  
-    if int(fpsframe) < min_fps and (int(fpsframe) > 0):
-        min_fps = int(fpsframe)
-    elif int(fpsframe)  > max_fps:
-        max_fps = int(fpsframe)
+    #if int(fpsframe) < min_fps and (int(fpsframe) > 0):
+    #    min_fps = int(fpsframe)
+    #elif int(fpsframe)  > max_fps:
+    #    max_fps = int(fpsframe)
         
     k = cv2.waitKey(1) & 0xFF
     if k == 27:
         break
         
 cap.release()
-    #out.release()
+out.release()
 
 
 print(f"El minimo FPS fue de {min_fps} y el maximo FPS fue de {max_fps} ")

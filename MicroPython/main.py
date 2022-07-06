@@ -44,6 +44,7 @@ PMW_M2_1 = 19
 #Cola de accionamiento valvulas, estas determinan el orden en que llegan los mensajes y el orden de accionamiento de las valvulas
 queue_valvulas = []
 valvulas_dict = dict()
+contador2 = 0
 
 
 
@@ -80,12 +81,19 @@ def desactivar_valvula():
 
     
     
-def activar_valvula():
+def activar_valvula(valv):
     global queue_valvulas #tengo que ponerlo porque la modificaré :c
-    if queue_valvulas:
-        valvula = int(queue_valvulas.pop(0))
+    continuar = True
+    if continuar:
+        #valvula = int(queue_valvulas.pop(0))
+        valvula = valv
+        print("valvula activada: ", valvula)
         valvulas_dict["valvula"+str(valvula)].duty(1023)
-        print("valvula activada:", valvula)
+        time.sleep(0.001)
+        valvulas_dict["valvula"+str(valvula)].duty(0)
+        
+        #print("valvula activada:", valvula)
+        
 
 
     
@@ -133,6 +141,7 @@ if __name__ == '__main__':
     s = usocket.socket()
     s.bind(("192.168.4.1",2020))
     s.listen(10)
+    control = 0
     
     ###lcd.putstr("Esperando conexiones")
     #time.sleep(1)
@@ -154,6 +163,7 @@ if __name__ == '__main__':
             
         while True:
             codigo = sc.recv(3).decode()
+            #print("codigo:", codigo)
             
             try:
             #Recibo mensaje de 3 bytes
@@ -162,19 +172,24 @@ if __name__ == '__main__':
                 continue
             
             if mensaje[0] == "1":
-                print("Control")
+                #print("Control")
+                control += 1
                 pass
 
             #composición mensaje [función,tiempo,zona]
             if mensaje[0] == "2":
-                queue_valvulas.append(int(mensaje[2])) 
-                queue_valvulas.append(int(mensaje[2])) 
-                activar_valvula()
-                time.sleep(0.04)
-                desactivar_valvula()
-                time.sleep(0.03)
+                #queue_valvulas.append(int(mensaje[2])) 
+                
+                #queue_valvulas.append(int(mensaje[2])) 
+                activar_valvula(int(mensaje[2]))
+                time.sleep(0.001)
+                #desactivar_valvula()
+                #contador2 += 1
+                #time.sleep(0.03)
+                
 
             elif mensaje[0] == "4":
+                print("Se recibieron", contador2, "senales")
                 sc.close()
                 break
 
